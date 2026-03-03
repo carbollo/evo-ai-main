@@ -33,16 +33,38 @@ from google.adk.sessions import DatabaseSessionService
 from google.adk.memory import InMemoryMemoryService
 from dotenv import load_dotenv
 
-load_dotenv()
-
+from src.config.settings import settings
 from src.services.crewai.session_service import CrewSessionService
 
+load_dotenv()
+
+
+def _get_db_url() -> str:
+    """
+    Resolve the database URL for session services.
+
+    Prefer the normalized POSTGRES_CONNECTION_STRING from settings,
+    which already falls back to DATABASE_URL when available.
+    """
+    db_url = settings.POSTGRES_CONNECTION_STRING
+    if not db_url:
+        # Fallback for safety, though it should normally be set via settings
+        db_url = os.getenv("POSTGRES_CONNECTION_STRING") or os.getenv("DATABASE_URL")
+
+    if not db_url:
+        raise ValueError("Database URL is not configured for session service.")
+
+    # Normalize legacy postgres:// scheme if needed
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    return db_url
+
+
 if os.getenv("AI_ENGINE") == "crewai":
-    session_service = CrewSessionService(db_url=os.getenv("POSTGRES_CONNECTION_STRING"))
+    session_service = CrewSessionService(db_url=_get_db_url())
 else:
-    session_service = DatabaseSessionService(
-        db_url=os.getenv("POSTGRES_CONNECTION_STRING")
-    )
+    session_service = DatabaseSessionService(db_url=_get_db_url())
 
 artifacts_service = InMemoryArtifactService()
 memory_service = InMemoryMemoryService()
