@@ -54,6 +54,7 @@ logger = logging.getLogger(__name__)
 
 def create_admin_user():
     """Create an initial admin user in the system"""
+    session = None
     try:
         # Load environment variables
         load_dotenv()
@@ -106,7 +107,8 @@ def create_admin_user():
         logger.error(f"Error creating admin: {str(e)}")
         return False
     finally:
-        session.close()
+        if session is not None:
+            session.close()
 
 
 if __name__ == "__main__":
