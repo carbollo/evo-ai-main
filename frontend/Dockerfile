@@ -9,10 +9,10 @@ ARG NEXT_PUBLIC_API_URL=https://api.evo-ai.co
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Copy package files first for better caching
-COPY package.json pnpm-lock.yaml ./
+# Copy package file first for better caching
+COPY package.json ./
 
-# Install dependencies
+# Install dependencies (lockfile will be generated during install)
 RUN pnpm install --no-frozen-lockfile
 
 # Copy all source code (this includes tsconfig.json, lib/, etc.)
@@ -36,7 +36,7 @@ ARG NEXT_PUBLIC_API_URL=https://api-evoai.evoapicloud.com
 RUN npm install -g pnpm
 
 # Install production dependencies only
-COPY package.json pnpm-lock.yaml ./
+COPY package.json ./
 RUN pnpm install --prod --no-frozen-lockfile
 
 # Copy built assets from builder
