@@ -47,6 +47,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 from src.models.models import User, Client
 from src.utils.security import get_password_hash
+from src.config.settings import settings
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -60,10 +61,12 @@ def create_demo_client_and_user():
         # Load environment variables
         load_dotenv()
 
-        # Get database settings
-        db_url = os.getenv("POSTGRES_CONNECTION_STRING")
+        # Get database settings (normalized from settings)
+        db_url = settings.POSTGRES_CONNECTION_STRING
         if not db_url:
-            logger.error("Environment variable POSTGRES_CONNECTION_STRING not defined")
+            logger.error(
+                "Database URL not defined. Please set POSTGRES_CONNECTION_STRING or DATABASE_URL"
+            )
             return False
 
         # Get demo user password (or use default)

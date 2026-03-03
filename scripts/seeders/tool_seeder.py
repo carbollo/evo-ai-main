@@ -41,6 +41,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 from src.models.models import Tool
+from src.config.settings import settings
 
 # Configure logging
 logging.basicConfig(
@@ -55,10 +56,12 @@ def create_tools():
         # Load environment variables
         load_dotenv()
 
-        # Get database settings
-        db_url = os.getenv("POSTGRES_CONNECTION_STRING")
+        # Get database settings (normalized from settings)
+        db_url = settings.POSTGRES_CONNECTION_STRING
         if not db_url:
-            logger.error("Environment variable POSTGRES_CONNECTION_STRING not defined")
+            logger.error(
+                "Database URL not defined. Please set POSTGRES_CONNECTION_STRING or DATABASE_URL"
+            )
             return False
 
         # Connect to the database

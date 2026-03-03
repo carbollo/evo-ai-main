@@ -38,6 +38,8 @@ import logging
 import argparse
 from dotenv import load_dotenv
 
+from src.config.settings import settings
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -56,9 +58,12 @@ def setup_environment():
     """Configure the environment for seeders"""
     load_dotenv()
 
-    # Check if essential environment variables are defined
-    required_vars = ["POSTGRES_CONNECTION_STRING"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    # Check if essential environment variables are defined.
+    # We accept either POSTGRES_CONNECTION_STRING or DATABASE_URL,
+    # which is already normalized in settings.POSTGRES_CONNECTION_STRING.
+    missing_vars = []
+    if not settings.POSTGRES_CONNECTION_STRING:
+        missing_vars.append("POSTGRES_CONNECTION_STRING or DATABASE_URL")
 
     if missing_vars:
         logger.error(
